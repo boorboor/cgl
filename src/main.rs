@@ -1,7 +1,7 @@
-use std::io::{Write, stdout};
-use termion::{cursor, clear, style};
-use termion::raw::IntoRawMode;
 use std::collections::HashSet;
+use std::io::{stdout, Write};
+use termion::raw::IntoRawMode;
+use termion::{clear, cursor};
 
 type Coord = (u16, u16);
 
@@ -24,7 +24,11 @@ impl World {
         for y in 0..self.height {
             for x in 0..self.width {
                 let cell = (x, y);
-                let symbol = if self.cells.contains(&cell) { "█" } else { " " };
+                let symbol = if self.cells.contains(&cell) {
+                    "█"
+                } else {
+                    " "
+                };
                 write!(stdout, "{}{}", cursor::Goto(x + 1, y + 1), symbol).unwrap();
             }
         }
@@ -75,16 +79,12 @@ fn main() {
     world.cells.insert((1, 3));
     world.cells.insert((2, 3));
     world.cells.insert((3, 3));
-    world.cells.insert((1, 1));
-    world.cells.insert((1, 2));
-    world.cells.insert((1, 3));
-    world.cells.insert((1, 3));
 
     loop {
         write!(stdout, "{}{}", clear::All, cursor::Hide).unwrap();
         world.render(&mut stdout);
         stdout.flush().unwrap();
-        std::thread::sleep(std::time::Duration::from_millis(100)); 
+        std::thread::sleep(std::time::Duration::from_millis(500));
         world.simulate();
     }
 }
