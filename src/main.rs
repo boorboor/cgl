@@ -1,6 +1,5 @@
 use std::collections::HashSet;
 use std::io::{stdout, Write};
-use termion::raw::IntoRawMode;
 use termion::{clear, cursor};
 
 type Coord = (u16, u16);
@@ -70,7 +69,7 @@ impl World {
 }
 
 fn main() {
-    let mut stdout = stdout().into_raw_mode().unwrap();
+    let mut stdout = stdout();
     let (width, height) = termion::terminal_size().unwrap();
     let mut world = World::new(width, height);
 
