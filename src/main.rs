@@ -73,11 +73,13 @@ fn main() {
     let (width, height) = termion::terminal_size().unwrap();
     let mut world = World::new(width, height);
 
-    world.cells.insert((2, 1));
-    world.cells.insert((3, 2));
-    world.cells.insert((1, 3));
-    world.cells.insert((2, 3));
-    world.cells.insert((3, 3));
+    // Glider pattern centered at (center_x, center_y)
+    let (center_x, center_y) = (width / 4, height / 4);
+    world.cells.insert((center_x + 1, center_y));
+    world.cells.insert((center_x + 2, center_y + 1));
+    world.cells.insert((center_x, center_y + 2));
+    world.cells.insert((center_x + 1, center_y + 2));
+    world.cells.insert((center_x + 2, center_y + 2));
 
     loop {
         write!(stdout, "{}{}", clear::All, cursor::Hide).unwrap();
