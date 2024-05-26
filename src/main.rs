@@ -1,5 +1,11 @@
 use std::collections::HashSet;
 use std::io::{stdout, Write};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
+use std::thread;
+use std::time::Duration;
+
+use signal_hook::{consts::SIGINT, iterator::Signals};
 use termion::{clear, cursor};
 
 type Coord = (u16, u16);
@@ -69,6 +75,9 @@ impl World {
 }
 
 fn main() {
+    let running = Arc::new(AtomicBool::new(true));
+    let running_clone = running.clone();
+
     let mut stdout = stdout();
     let (width, height) = termion::terminal_size().unwrap();
     let mut world = World::new(width, height);
@@ -81,11 +90,21 @@ fn main() {
     world.cells.insert((center_x + 1, center_y + 2));
     world.cells.insert((center_x + 2, center_y + 2));
 
-    loop {
+    let mut signals = Signals::new(&[SIGINT]).unwrap();
+    thread::spawn(move || {
+        for _ in signals.forever() {
+            running_clone.store(false, Ordering::SeqCst);
+        }
+    });
+
+    while running.load(Ordering::SeqCst) {
         write!(stdout, "{}{}", clear::All, cursor::Hide).unwrap();
         world.render(&mut stdout);
         stdout.flush().unwrap();
-        std::thread::sleep(std::time::Duration::from_millis(500));
+        thread::sleep(Duration::from_millis(500));
         world.simulate();
     }
+
+    write!(stdout, "{}{}", clear::All, cursor::Goto(1, 1)).unwrap();
+    stdout.flush().unwrap();
 }
